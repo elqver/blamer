@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 import urllib
 
 from dotenv import load_dotenv
