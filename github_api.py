@@ -36,10 +36,6 @@ def get_commits(username, repo_name):
     return request_github(f'repos/{username}/{repo_name}/commits')
 
 
-def get_user_repos(username):
-    return request_github(f'users/{username}/repos')
-
-
 def get_repos_commits(username, repo_name, since=None, until=None):
     params = {since: since} if since else {} | {until: until} if until else {}
     return request_github(f'repos/{username}/{repo_name}/commits')
