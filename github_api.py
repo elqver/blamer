@@ -1,6 +1,7 @@
 import datetime
 import os
 import urllib
+from loguru import logger
 
 from dotenv import load_dotenv
 import requests
@@ -15,11 +16,11 @@ GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 def request_github(endpoint, params=None, extra_headers=None):
     url = f'https://api.github.com{'' if endpoint.startswith('/') else '/'}{endpoint}'
     if params:
-        print(params)
         url += '?' + urllib.parse.urlencode(params)
-    print(f'Fetching {url}')
+    logger.debug(f'Fetching {url}')
     headers = {'Authorization': f'token {GITHUB_TOKEN}'}
     if extra_headers:
+        logger.debug(f'Adding extra headers: {extra_headers}')
         headers.update(extra_headers)
     response = requests.get(url, headers=headers)
     return response.json()
@@ -52,24 +53,27 @@ def get_commit_lines_delta(username, repo_name, commit_sha):
 
 
 def get_repository_lines_delta(username, repo_name, since=None, until=None):
-    return sum(
+    return max(sum(
         get_commit_lines_delta(username, repo_name, commit['sha'])
         for commit
         in get_repos_commits(username, repo_name, since, until)
+    ), 0)
+
+
+def get_user_total_lines_delta(username, since=None, until=None):
+    return sum(
+        get_repository_lines_delta(username, repo['name'], since, until)
+        for repo
+        in get_user_repos(username)
     )
 
 
 def main():
     target_user = 'elqver'
-    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%d')
-    repos = (
-        repo['name'] for repo in
-        get_user_repos(target_user)
-    )
-    for repo in repos:
-        print(
-            f'{repo}: {get_repository_lines_delta(target_user, repo, since=today)}'
-        )
+    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%S')
+    logger.info(f'User {target_user} has added '
+                f'{get_user_total_lines_delta(target_user, since=today)} '
+                f'lines of code today')
 
 
 if __name__ == '__main__':
