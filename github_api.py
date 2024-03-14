@@ -1,3 +1,4 @@
+import datetime
 import os
 import urllib
 
@@ -11,16 +12,24 @@ if os.path.exists('github_creds.env'):
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
 
-def request_github(endpoint):
+def request_github(endpoint, params=None, extra_headers=None):
     url = f'https://api.github.com{'' if endpoint.startswith('/') else '/'}{endpoint}'
+    if params:
+        url += '?' + urllib.parse.urlencode(params)
     print(f'Fetching {url}')
     headers = {'Authorization': f'token {GITHUB_TOKEN}'}
+    if extra_headers:
+        headers.update(extra_headers)
     response = requests.get(url, headers=headers)
     return response.json()
 
 
 def get_user_info(username):
     return request_github(f'users/{username}')
+
+
+def get_user_repos(username):
+    return request_github(f'users/{username}/repos')
 
 
 def get_commits(username, repo_name):
@@ -31,25 +40,37 @@ def get_user_repos(username):
     return request_github(f'users/{username}/repos')
 
 
-def get_repos_commits(username, repo_name):
+def get_repos_commits(username, repo_name, since=None, until=None):
+    params = {since: since} if since else {} | {until: until} if until else {}
     return request_github(f'repos/{username}/{repo_name}/commits')
+
+
+def get_commit_lines_delta(username, repo_name, commit_sha):
+    return sum(
+        file['additions'] - file['deletions']
+        for file
+        in request_github(f'repos/{username}/{repo_name}/commits/{commit_sha}')['files']
+    )
+
+
+def get_repository_lines_delta(username, repo_name, since=None, until=None):
+    return sum(
+        get_commit_lines_delta(username, repo_name, commit['sha'])
+        for commit
+        in get_repos_commits(username, repo_name, since, until)
+    )
 
 
 def main():
     target_user = 'elqver'
-    target_repo = 'blamer'
-
-    total_additions = 0
-    total_deletions = 0
-    for commit in get_repos_commits(target_user, target_repo):
-        actual_commit_path = urllib.parse.urlparse(commit['url']).path
-        for file in request_github(actual_commit_path)['files']:
-            total_additions += file['additions']
-            total_deletions += file['deletions']
-    print(
-        f'Total additions: {total_additions}\n'
-        f'Total deletions: {total_deletions}'
+    repos = (
+        repo['name'] for repo in
+        get_user_repos(target_user)
     )
+    for repo in repos:
+        print(
+            f'{repo}: {get_repository_lines_delta(target_user, repo)}'
+        )
 
 
 if __name__ == '__main__':
