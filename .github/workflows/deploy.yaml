@@ -24,4 +24,4 @@ jobs:
 
       - name: Create Test File on Server
         run: |
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.USERNAME }}@${{ secrets.HOST_IP}} 'echo "Hello, this is a test file created by GitHub Actions." > test_file.txt'
+          ssh ${{ secrets.USERNAME }}@${{ secrets.HOST_IP}} 'echo "Hello, this is a test file created by GitHub Actions." > test_file.txt'
