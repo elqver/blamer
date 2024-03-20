@@ -1,0 +1,18 @@
+name: Simple SSH Test
+
+on:
+  push:
+    branches:
+      - setupcd
+
+jobs:
+  ssh_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Create Test File on Server
+        run: |
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.USERNAME }}@${{ secrets.HOST_IP}} 'echo "Hello, this is a test file created by GitHub Actions." > test_file.txt'
