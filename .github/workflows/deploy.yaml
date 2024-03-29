@@ -16,10 +16,10 @@ jobs:
           touch ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Install SSH client and Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openssh-client docker.io
+#      - name: Install SSH client and Docker
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y openssh-client docker.io
 
       - name: Add server's host key to known_hosts
         run: ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
