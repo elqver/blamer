@@ -24,6 +24,9 @@ jobs:
       - name: Add server's host key to known_hosts
         run: ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
 
+      - name: test ls
+        run: ls
+
       - name: Build Docker Image
         run: docker build -t myapp .
 
