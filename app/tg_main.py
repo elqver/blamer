@@ -28,7 +28,7 @@ async def start(message: aiogram.types.Message):
 async def get_lines(message: aiogram.types.Message):
     await message.answer('Fetching current line progress...')
     user = message.from_user.username
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%S')
+    today = datetime.now().strftime('%Y-%m-%dT00:00:00Z')
     result = await get_user_total_lines_delta(user, today)
     await message.answer(f'User {user} has added {result} lines of code today')
 

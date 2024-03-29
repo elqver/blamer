@@ -88,7 +88,7 @@ async def get_user_total_lines_delta(username, since=None, until=None):
 
 async def main():
     target_user = 'elqver'
-    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%S')
+    today = datetime.datetime.now().strftime('%Y-%m-%dT00:00:00Z')
     logger.info(f'User {target_user} has added '
                 f'{await get_user_total_lines_delta(target_user, since=today)} '
                 f'lines of code today')

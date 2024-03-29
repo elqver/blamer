@@ -1,4 +1,4 @@
-name: Simple SSH Test
+name: Docker Build and Deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - setupcd
 
 jobs:
-  ssh_test:
+  docker_build_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,17 +14,33 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           touch ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa  
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Create SSH Key File
-        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-
-      - name: Install SSH client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
+      - name: Install SSH client and Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client docker.io
 
       - name: Add server's host key to known_hosts
         run: ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
 
-      - name: Create Test File on Server
+      - name: Build Docker Image
+        run: docker build -t myapp .
+
+      - name: Save Docker Image to Tar
+        run: docker save myapp -o myapp.tar
+
+      - name: Copy Docker Image to Server
+        run: scp -i ~/.ssh/id_rsa myapp.tar ${{ secrets.USERNAME }}@${{ secrets.HOST_IP }}:/path/to/save
+
+      - name: SSH into Server and Load Docker Image
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST_IP}} 'echo "Hello, this is a test file created by GitHub Actions." > test_file.txt'
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST_IP }} 'docker load -i /path/to/save/myapp.tar'
+
+      - name: Stop and Remove Existing Docker Container
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST_IP }} 'docker stop myapp && docker rm myapp || true'
+
+      - name: Run Docker Container on Server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST_IP }} 'docker run -d -p 80:80 --name myapp myapp'
