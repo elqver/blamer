@@ -14,36 +14,36 @@ defaults:
 
 jobs:
   delivery:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout
-    - name: Build docker image
-      run: |
-        docker build -t blamer .
-    - name: Save docker image
-      run: |
-        docker save -o blamer.tar blamer
-    - nmae: Set up ssh
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -t rsa ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
-    - name: Upload image to server
-      run: |
-        scp -i ~/.ssh/id_rsa blamer.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/tmp/blamer.tar
-    - name: Upload docker-compose to server
-      run: |
-        scp -i ~/.ssh/id_rsa docker-compose.yaml ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/docker-compose.yaml
-    - name: Update container
-      run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
-          "docker-compose down || true && \
-          docker rm blamer_container || true && \
-          docker rmi blamer || true && \
-          docker load -i ~/tmp/blamer.tar && \
-          docker-compose up"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout
+      - name: Build docker image
+        run: |
+          docker build -t blamer .
+      - name: Save docker image
+        run: |
+          docker save -o blamer.tar blamer
+      - nmae: Set up ssh
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+      - name: Upload image to server
+        run: |
+          scp -i ~/.ssh/id_rsa blamer.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/tmp/blamer.tar
+      - name: Upload docker-compose to server
+        run: |
+          scp -i ~/.ssh/id_rsa docker-compose.yaml ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/docker-compose.yaml
+      - name: Update container
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
+            "docker-compose down || true && \
+            docker rm blamer_container || true && \
+            docker rmi blamer || true && \
+            docker load -i ~/tmp/blamer.tar && \
+            docker-compose up"
 
