@@ -1,12 +1,11 @@
 import asyncio
 import datetime
 import os
-import urllib
+from urllib import parse as urllibparse
 import httpx
 from loguru import logger
 
 from dotenv import load_dotenv
-import requests
 
 if os.path.exists('github_creds.env'):
     load_dotenv('github_creds.env')
@@ -20,10 +19,10 @@ current_parallel_requests = 0
 
 async def request_github(endpoint, params=None, extra_headers=None):
 
-    url = f'https://api.github.com{'' if endpoint.startswith('/') else '/'}{endpoint}'
+    url = f"https://api.github.com{'' if endpoint.startswith('/') else '/'}{endpoint}"
 
     if params:
-        url += '?' + urllib.parse.urlencode(params)
+        url += '?' + urllibparse.urlencode(params)
     logger.debug(f'Fetching {url}')
 
     headers = {'Authorization': f'token {GITHUB_TOKEN}'}

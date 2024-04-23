@@ -14,6 +14,8 @@ if os.path.exists('tg_creds.env'):
 
 
 TG_TOKEN = os.getenv('TG_TOKEN')
+if TG_TOKEN is None: 
+    raise ValueError("no env for TG_TOKEN provided")
 
 dp = aiogram.Dispatcher()
 
