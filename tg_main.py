@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import asyncio
 
 import aiogram
+from aiogram import filters
 
 
 from github_api import get_user_total_lines_delta
@@ -14,17 +15,19 @@ if os.path.exists('tg_creds.env'):
 
 
 TG_TOKEN = os.getenv('TG_TOKEN')
+if TG_TOKEN is None: 
+    raise ValueError("no env for TG_TOKEN provided")
 
 dp = aiogram.Dispatcher()
 
 
-@dp.message(aiogram.filters.CommandStart())
+@dp.message(filters.CommandStart())
 async def start(message: aiogram.types.Message):
     await message.answer('Hello, I am a bot!')
 
 
 # get current line progress endpoint
-@dp.message(aiogram.filters.Command("lines"))
+@dp.message(filters.Command("lines"))
 async def get_lines(message: aiogram.types.Message):
     await message.answer('Fetching current line progress...')
     user = message.from_user.username
