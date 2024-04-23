@@ -24,7 +24,7 @@ jobs:
       - name: Save docker image
         run: |
           docker save -o blamer.tar blamer
-      - nmae: Set up ssh
+      - name: Set up ssh
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
