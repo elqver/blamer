@@ -17,9 +17,12 @@ max_parallel_requests = 0
 current_parallel_requests = 0
 
 
+GITHUB_URL = "https://api.github.com"
+
+
 async def request_github(endpoint, params=None, extra_headers=None):
 
-    url = f"https://api.github.com{'' if endpoint.startswith('/') else '/'}{endpoint}"
+    url = f"{GITHUB_URL}{'' if endpoint.startswith('/') else '/'}{endpoint}"
 
     if params:
         url += '?' + urllibparse.urlencode(params)
@@ -45,12 +48,12 @@ async def request_github(endpoint, params=None, extra_headers=None):
         return response.json()
 
 
-async def get_user_repos(username, since=None, until=None):
+async def get_user_repos(username, since: str | None=None, until: str | None=None):
     params = {"since": since} if since else {} | {"until": until} if until else {}
     return await request_github(f'users/{username}/repos', params=params)
 
 
-async def get_repos_commits(username, repo_name, since=None, until=None):
+async def get_repos_commits(username, repo_name, since: str | None=None, until: str | None=None):
     params = {"since": since} if since else {} | {"until": until} if until else {}
     return await request_github(f'repos/{username}/{repo_name}/commits', params)
 
@@ -63,7 +66,7 @@ async def get_commit_lines_delta(username, repo_name, commit_sha):
     ), 0)
 
 
-async def get_repository_lines_delta(username, repo_name, since=None, until=None):
+async def get_repository_lines_delta(username, repo_name, since: str | None=None, until: str | None=None):
     commit_calculations = asyncio.gather(
         *[
             get_commit_lines_delta(username, repo_name, commit['sha'])
@@ -83,17 +86,4 @@ async def get_user_total_lines_delta(username, since=None, until=None):
         in user_repos
     ])
     return sum(repositories_line_deltas)
-
-
-async def main():
-    target_user = 'elqver'
-    today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%dT%H:%M:%S')
-    logger.info(f'User {target_user} has added '
-                f'{await get_user_total_lines_delta(target_user, since=today)} '
-                f'lines of code today')
-    logger.info(f'Max parallel requests: {max_parallel_requests}')
-
-
-if __name__ == '__main__':
-    asyncio.run(main())
 
