@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  blamer:
+    image: blamer
+    container_name: blamer_container
+    restart: always
+    env_file:
+      - secrets.env
+    volumes:
+      - ./app:/app
+
