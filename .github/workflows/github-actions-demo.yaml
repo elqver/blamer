@@ -23,14 +23,16 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           with: |
-            if [ ! -d "blamer" ]; then 
-                git clone "${{ github.repository }}" "blamer" 
-            fi
-            cd "blamer"
-            git pull origin main
-            docker-compose down
-            docker rm blamer_container
-            docker rmi blamer
-            docker build -t "blamer" .
-            docker-compose up -d
+            pwd
+            echo "hello from github actions" >> github_actions_report.txt
+            # if [ ! -d "blamer" ]; then 
+            #     git clone "${{ github.repository }}" "blamer" 
+            # fi
+            # cd "blamer"
+            # git pull origin main
+            # docker-compose down
+            # docker rm blamer_container
+            # docker rmi blamer
+            # docker build -t "blamer" .
+            # docker-compose up -d
 
