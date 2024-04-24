@@ -34,10 +34,10 @@ jobs:
           ssh-keyscan -t rsa ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
       - name: Upload image to server
         run: |
-          scp -i ~/.ssh/id_rsa blamer.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/tmp/blamer.tar
+          scp -f -i ~/.ssh/id_rsa blamer.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/tmp/blamer.tar
       - name: Upload docker-compose to server
         run: |
-          scp -i ~/.ssh/id_rsa docker-compose.yaml ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/docker-compose.yaml
+          scp -f -i ~/.ssh/id_rsa docker-compose.yaml ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/docker-compose.yaml
       - name: Update container
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
