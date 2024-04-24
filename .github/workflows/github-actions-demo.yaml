@@ -16,7 +16,7 @@ jobs:
   delivery:
     runs-on: ubuntu-latest
     steps:
-      - name: Get updates on remote server
+      - name: Get get updates
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_IP }}
@@ -26,11 +26,51 @@ jobs:
             if [ ! -d "blamer" ]; then 
             git clone "https://github.com/${{ github.repository}}.git" "blamer" 
             fi
-            cd "blamer"
+            cd blamer
             git pull origin main
+
+      - name: Down compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd blamer
             docker-compose down
             docker rm blamer_container
             docker rmi blamer
             docker build -t "blamer" .
+            docker-compose up -d
+
+      - name: Remove old image and container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd blamer
+            docker rm blamer_container
+            docker rmi blamer
+
+      - name: Build new image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd blamer
+            docker build -t "blamer" .
+
+      - name: Run compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd blamer
             docker-compose up -d
 
