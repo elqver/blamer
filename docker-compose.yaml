@@ -5,7 +5,8 @@ services:
     image: blamer
     container_name: blamer_container
     restart: always
-    environment:
-      - TG_TOKEN = ${{ secrets.TG_TOKEN }}
-      - GITHUB_TOKEN = ${{ secrets.GH_TOKEN }}
+    env_file:
+      - secrets.env
+    volumes:
+      - ./app:/app
 

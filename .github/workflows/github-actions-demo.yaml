@@ -16,34 +16,30 @@ jobs:
   delivery:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
       - name: Build docker image
         run: |
           docker build -t blamer .
       - name: Save docker image
         run: |
           docker save -o blamer.tar blamer
-      - name: Set up ssh
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH keys
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Get updates on remote server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP }}
+          username: ${{ secrets.SSH_USER }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
-      - name: Upload image to server
-        run: |
-          scp -f -i ~/.ssh/id_rsa blamer.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/tmp/blamer.tar
-      - name: Upload docker-compose to server
-        run: |
-          scp -f -i ~/.ssh/id_rsa docker-compose.yaml ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/docker-compose.yaml
-      - name: Update container
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
-            "docker-compose down || true && \
-            docker rm blamer_container || true && \
-            docker rmi blamer || true && \
-            docker load -i ~/tmp/blamer.tar && \
-            docker-compose up"
+          if [ ! -d "blamer" ]; then 
+              git clone "${{ github.repository }}" "blamer" 
+          fi
+          cd "blamer"
+          git pull origin main
+          docker-compose down
+          docker rm blamer_container
+          docker rmi blamer
+          docker build -t "blamer" .
+          docker-compose up -d
 
