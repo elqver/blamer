@@ -24,7 +24,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             if [ ! -d "blamer" ]; then 
-                git clone "${{ github.repositoryUrl }}" "blamer" 
+            git clone "https://github.com/${{ github.repository}}.git" "blamer" 
             fi
             cd "blamer"
             git pull origin main
