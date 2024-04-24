@@ -31,15 +31,15 @@ jobs:
         with:
           host: ${{ secrets.SSH_IP }}
           username: ${{ secrets.SSH_USER }}
-        run: |
-          if [ ! -d "blamer" ]; then 
-              git clone "${{ github.repository }}" "blamer" 
-          fi
-          cd "blamer"
-          git pull origin main
-          docker-compose down
-          docker rm blamer_container
-          docker rmi blamer
-          docker build -t "blamer" .
-          docker-compose up -d
+          with: |
+            if [ ! -d "blamer" ]; then 
+                git clone "${{ github.repository }}" "blamer" 
+            fi
+            cd "blamer"
+            git pull origin main
+            docker-compose down
+            docker rm blamer_container
+            docker rmi blamer
+            docker build -t "blamer" .
+            docker-compose up -d
 
