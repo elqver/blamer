@@ -16,12 +16,6 @@ jobs:
   delivery:
     runs-on: ubuntu-latest
     steps:
-      - name: Build docker image
-        run: |
-          docker build -t blamer .
-      - name: Save docker image
-        run: |
-          docker save -o blamer.tar blamer
       - name: Set up SSH keys
         uses: webfactory/ssh-agent@v0.5.3
         with:
