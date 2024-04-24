@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.SSH_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          with: |
+          script: |
             pwd
             echo "hello from github actions" >> github_actions_report.txt
             # if [ ! -d "blamer" ]; then 
