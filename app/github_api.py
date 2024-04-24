@@ -11,7 +11,7 @@ if os.path.exists('github_creds.env'):
     load_dotenv('github_creds.env')
 
 
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+GITHUB_TOKEN = os.getenv('GH_TOKEN')
 
 max_parallel_requests = 0
 current_parallel_requests = 0
