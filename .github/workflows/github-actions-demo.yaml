@@ -16,15 +16,12 @@ jobs:
   delivery:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up SSH keys
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Get updates on remote server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_IP }}
           username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           with: |
             if [ ! -d "blamer" ]; then 
                 git clone "${{ github.repository }}" "blamer" 
