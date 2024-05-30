@@ -1,0 +1,13 @@
+{
+	"include": [
+		"app", 
+		"tests"
+	],
+	"exclude": [
+		"**/__pycache__"
+	],
+	"venvPath": "./",
+	"venv": ".venv",
+	"pythonVersion": "3.10",
+	"pythonPlatform": "Linux",
+}
