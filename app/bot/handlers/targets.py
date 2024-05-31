@@ -145,7 +145,6 @@ async def remove_target(callback_query: CallbackQuery, callback_data: RemoveCall
         callback_data.committer,
         user_handle=callback_query.from_user.username,
     )
-    logger.debug(f"{callback_data=} {callback_query=}")
     await callback_query.answer(
         f"Target <{callback_data.repo} | {callback_data.committer}> has been removed"
     )

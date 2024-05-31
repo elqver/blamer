@@ -34,28 +34,56 @@ async def request_github(endpoint: str, params=None, extra_headers=None):
         return response.json()
 
 
+async def get_repository_branches(repo: str) -> list[str]:
+    return [branch["name"] for branch in await request_github(f"repos/{repo}/branches")]
+
+
+async def get_commits_sha(
+    repo: str,
+    committer: str,
+    branch_sha: str,
+    since: datetime.datetime,
+    until: datetime.datetime | None = None,
+):
+    return {
+        commit["sha"]
+        for commit in await request_github(
+            endpoint=f"repos/{repo}/commits",
+            params={
+                "committer": committer,
+                "since": since.isoformat() + "Z",
+                "sha": branch_sha,
+            }
+            | ({"until": until.isoformat() + "Z"} if until is not None else {}),
+        )
+    }
+
+
 async def get_target_stats(
     repo: str,
     committer: str,
     since: datetime.datetime,
     until: datetime.datetime | None = None,
 ):
-    res = await request_github(
-        endpoint=f"repos/{repo}/commits",
-        params={
-            "committer": committer,
-            "since": since.isoformat() + "Z",
-        }
-        | ({"until": until.isoformat() + "Z"} if until is not None else {}),
+    branches = await get_repository_branches(repo)
+    commits = set.union(
+        *(
+            await asyncio.gather(
+                *[
+                    get_commits_sha(repo, committer, branch, since=since, until=until)
+                    for branch in branches
+                ]
+            )
+        )
     )
 
-    async def fetch_commit_stats(commit, repo):
-        return (await request_github(endpoint=f"repos/{repo}/commits/{commit['sha']}"))[
+    async def fetch_commit_stats(commit: str, repo):
+        return (await request_github(endpoint=f"repos/{repo}/commits/{commit}"))[
             "stats"
         ]
 
     repo_stats = await asyncio.gather(
-        *[fetch_commit_stats(commit, repo) for commit in res]
+        *[fetch_commit_stats(commit, repo) for commit in commits]
     )
     return repo_stats
 
