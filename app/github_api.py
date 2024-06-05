@@ -20,12 +20,10 @@ async def request_github(endpoint: str, params=None, extra_headers=None):
 
     if params:
         url += "?" + urllibparse.urlencode(params)
-    logger.debug(f"Fetching {url}")
 
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     # headers = {}
     if extra_headers:
-        logger.debug(f"Adding extra headers: {extra_headers}")
         headers.update(extra_headers)
 
     async with httpx.AsyncClient() as client:

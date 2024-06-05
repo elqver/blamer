@@ -1,6 +1,6 @@
-FROM python:3.10-slim
-WORKDIR /app
-COPY app/requirements.txt /app/
-RUN pip install -r requirements.txt
-CMD ["python", "app.py"]
+FROM blamer_python_deps
+COPY app /app/
+WORKDIR app
+
+CMD sh -c "python -m alembic upgrade head && python main.py"
 

@@ -1,12 +1,32 @@
 version: '3'
 
 services:
-  blamer:
+  blamer-bot:
     image: blamer
-    container_name: blamer_container
+    container_name: blamer-bot
     restart: always
     env_file:
-      - secrets.env
+      - local.env
+    depends_on:
+      blamer-db:
+        condition: service_healthy
+    links:
+      - blamer-db
+
+  blamer-db: 
+    image: 'postgres:latest'
+    container_name: blamer-db
+    ports:
+      - "25432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
-      - ./app:/app
+      - ./db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${DB_USERNAME} -d ${DB_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
