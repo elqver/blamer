@@ -45,5 +45,4 @@ async def get_or_create_user(handle: str, *, db: AsyncSession) -> int:
         instance = User(handle=handle)
         db.add(instance)
         await db.flush()
-    logger.debug(f"{type(instance)=} and {dir(instance)=} and {instance=}")
     return instance.id
