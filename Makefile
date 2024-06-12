@@ -1,6 +1,6 @@
-ENV_FILE := local.env
+ENV_FILE := .env
 
-run: down rm-volume rebuild
+run: down rebuild
 	docker-compose --env-file $(ENV_FILE) up -d --remove-orphans
 
 rebuild:

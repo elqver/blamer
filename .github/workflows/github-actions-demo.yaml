@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'deploy'
+      - 'db-setup'
 
 
 defaults:
@@ -16,7 +17,7 @@ jobs:
   delivery:
     runs-on: ubuntu-latest
     steps:
-      - name: Get get updates
+      - name: Get repo updates
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_IP }}
@@ -30,7 +31,7 @@ jobs:
             git pull origin ${{ github.ref }}
             git checkout ${{ github.ref }} 
 
-      - name: Update secrets
+      - name: Update envs
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_IP }}
@@ -38,12 +39,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd blamer
-            rm secrets.env
-            touch secrets.env
-            echo "TG_TOKEN=" ${{ secrets.TG_TOKEN }} >> secrets.env
-            echo "GH_TOKEN=" ${{ secrets.GH_TOKEN }} >> secrets.env
+            rm .env
+            touch .env
 
-      - name: Down compose
+            echo "TG_TOKEN=" ${{ secrets.TG_TOKEN }} >> .env
+            echo "GH_TOKEN=" ${{ secrets.GH_TOKEN }} >> .env
+            echo "DB_NAME=" ${{ variables.DB_NAME}} >> .env
+            echo "DB_USERNAME=" ${{ variables.DB_USERNAME }} >> .env
+            echo "DB_PASSWORD=" ${{ secrets.DB_PASSWORD }} >> .env
+
+            echo "DB_HOST=blamer-db" >> .env
+            echo "DB_PORT=5432" >> .env
+
+      - name: Restart
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_IP }}
@@ -51,40 +59,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd blamer
-            docker-compose down
-            docker rm blamer_container
-            docker rmi blamer
-            docker build -t "blamer" .
-            docker-compose up -d
-
-      - name: Remove old image and container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd blamer
-            docker rm blamer_container
-            docker rmi blamer
-
-      - name: Build new image
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd blamer
-            docker build -t "blamer" .
-
-      - name: Run compose
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_IP }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd blamer
-            docker-compose up -d
-
+            make
