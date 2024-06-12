@@ -29,7 +29,7 @@ jobs:
             fi
             cd blamer
             git pull origin ${{ github.ref }}
-            git checkout ${{ github.ref }} 
+            git checkout $GITHUB_REF
 
       - name: Update envs
         uses: appleboy/ssh-action@master
