@@ -42,11 +42,11 @@ jobs:
             rm .env
             touch .env
 
-            echo "TG_TOKEN=" ${{secrets.TG_TOKEN}} >> .env
-            echo "GH_TOKEN=" ${{secrets.GH_TOKEN}} >> .env
-            echo "DB_NAME=" ${{vars.DB_NAME}} >> .env
-            echo "DB_USERNAME=" ${{vars.DB_USERNAME}} >> .env
-            echo "DB_PASSWORD=" ${{vars.DB_PASSWORD}} >> .env
+            echo "TG_TOKEN=${{secrets.TG_TOKEN}}" >> .env
+            echo "GH_TOKEN=${{secrets.GH_TOKEN}}" >> .env
+            echo "DB_NAME=${{vars.DB_NAME}}" >> .env
+            echo "DB_USERNAME=${{vars.DB_USERNAME}}" >> .env
+            echo "DB_PASSWORD=${{vars.DB_PASSWORD}}" >> .env
 
             echo "DB_HOST=blamer-db" >> .env
             echo "DB_PORT=5432" >> .env
